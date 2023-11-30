@@ -1,0 +1,1 @@
+ docker build -t umami:0.1.1.3 .

@@ -22,6 +22,7 @@ export async function findSession(req: NextApiRequestCollect): Promise<{
   city: any;
   ownerId: string;
 }> {
+  let sessId;
   const { payload } = req.body;
 
   if (!payload) {
@@ -66,7 +67,16 @@ export async function findSession(req: NextApiRequestCollect): Promise<{
   const { userAgent, browser, os, ip, country, subdivision1, subdivision2, city, device } =
     await getClientInfo(req, payload);
 
-  const sessionId = uuid(websiteId, hostname, ip, userAgent);
+  if (payload.data.userId && isValidUuid(payload.data.userId)) {
+    sessId = payload.data.userId;
+  } else {
+    sessId = uuid(Math.random());
+  }
+
+  if (isValidUuid(sessId)) {
+    sessId = uuid(Math.random(), userAgent, ip);
+  }
+  const sessionId = sessId;
 
   // Clickhouse does not require session lookup
   if (clickhouse.enabled) {
@@ -123,4 +133,9 @@ async function checkUserBlock(userId: string) {
 
     throw new Error('Usage Limit.');
   }
+}
+
+function isValidUuid(str) {
+  const regex = /^[a-z,0-9,-]{36}$/;
+  return regex.test(str);
 }

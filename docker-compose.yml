@@ -2,30 +2,38 @@
 version: '3'
 services:
   umami:
-    image: ghcr.io/umami-software/umami:postgresql-latest
+    image: umami:0.1.6
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: postgresql://umami:umami@db:5432/umami
+      DATABASE_URL: postgresql://umami1:umami1@db:5432/umami1
       DATABASE_TYPE: postgresql
       APP_SECRET: replace-me-with-a-random-string
     depends_on:
       db:
         condition: service_healthy
+#    volumes:
+#      - ./public:/app/public
+#      - ./.next:/app/.next
     restart: always
   db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: umami
-      POSTGRES_USER: umami
-      POSTGRES_PASSWORD: umami
-    volumes:
-      - umami-db-data:/var/lib/postgresql/data
+      POSTGRES_DB: umami1
+      POSTGRES_USER: umami1
+      POSTGRES_PASSWORD: umami1
+#    volumes:
+#      - umami-db-data:/var/lib/postgresql/data
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
-volumes:
-  umami-db-data:
+  adminer:
+    image: adminer
+#    restart: always
+    ports:
+      - 8012:8080
+#volumes:
+#  umami-db-data:

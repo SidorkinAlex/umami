@@ -16,6 +16,7 @@
   const _false = 'false';
   const attr = currentScript.getAttribute.bind(currentScript);
   const website = attr(_data + 'website-id');
+  const userId = getUserId();
   const hostUrl = attr(_data + 'host-url');
   const autoTrack = attr(_data + 'auto-track') !== _false;
   const dnt = attr(_data + 'do-not-track');
@@ -31,6 +32,23 @@
   const delayDuration = 300;
 
   /* Helper functions */
+
+  function getUUID() {
+    return '10000000-1000-4000-8000-100000000000'.replace(/[018]/g, c =>
+      (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16),
+    );
+  }
+  function getUserId() {
+    if (attr(_data + 'userId')) {
+      return attr(_data + 'userId');
+    }
+    let userId = localStorage.getItem('umamiUserId');
+    if (!userId) {
+      userId = getUUID();
+      localStorage.setItem('umamiUserId', userId);
+    }
+    return userId;
+  }
 
   const hook = (_this, method, callback) => {
     const orig = _this[method];
@@ -57,6 +75,7 @@
     title,
     url: currentUrl,
     referrer: currentRef,
+    userId: userId,
   });
 
   /* Tracking functions */
@@ -180,6 +199,12 @@
     };
     if (typeof cache !== 'undefined') {
       headers['x-umami-cache'] = cache;
+    }
+    if (payload.userId) {
+      if (!payload.data) {
+        payload.data = {};
+      }
+      payload.data.userId = payload.userId;
     }
     return fetch(endpoint, {
       method: 'POST',

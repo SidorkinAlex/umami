@@ -1,0 +1,30 @@
+FROM ghcr.io/umami-software/umami:postgresql-v2.8.0
+
+
+
+
+#COPY ./next.config.js .
+COPY ./public ./public
+#COPY ./package.json ./package.json
+#COPY ./prisma ./prisma
+#COPY ./scripts ./scripts
+
+COPY ./.next/standalone ./
+
+COPY ./.next/static ./.next/static
+
+
+#COPY ./package.json /package.json
+
+#RUN yarn add npm-run-all dotenv prisma
+
+EXPOSE 3000
+
+ENV HOSTNAME 0.0.0.0
+ENV PORT 3000
+
+ENTRYPOINT ["tail", "-f", "/dev/null"]
+
+#WORKDIR /app
+
+#CMD ["yarn", "start-docker"]
